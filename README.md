@@ -1,3 +1,3 @@
-# Exploring CCTPv2 with Astro
+# Circle Wallets with Astro
 
-Rapid prototype of CCTPv2 flow in Astro.
+Exploring Developer Controlled Wallets on Astro
