@@ -1,50 +1,45 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import WalletList from '../components/WalletList.astro';
+import WalletSets from '../components/WalletSets.astro';
 import { actions } from 'astro:actions';
 import { getSecret } from "astro:env/server";
 
 const secretsConfigured = Boolean( getSecret('API_KEY')) && Boolean(getSecret('ENTITY_SECRET'));
-const createWalletResponse = Astro.getActionResult(actions.createWallet);
-console.log(secretsConfigured);
-if (createWalletResponse && !createWalletResponse.error) {
-  return Astro.redirect(`/wallets`);
+const createWalletSetResponse = Astro.getActionResult(actions.createWalletSet.createWalletSet);
+
+if (createWalletSetResponse && !createWalletSetResponse.error) {
+  return Astro.redirect(`/walletset/${createWalletSetResponse.data?.walletSet.id}`);
 }
 ---
 
-<BaseLayout title="Wallets Playground">
-	<main>
-		<section>
-			<h1>Wallets Playground</h1>
-			<p>An admin page to quickly create new wallets and grab IDs and addresses. Alternatively, go directly to the <a href="https://console.circle.com/wallets/dev/wallets">Circle developer's console</a> to see a list of all developer-controlled wallets that have been created.</p>
-		</section>
-
-		<section>
-			<h2>Create new wallet</h2>
-			<form action={actions.createWallet} method="POST">
-				<div class="select-wrapper">
-					<label for="blockChain">Source chain:</label>
-					<select name="blockChain" id="blockChain">
-						<option value="">-- Select --</option>
-						<option value="ARB-SEPOLIA">Arbitrum Sepolia</option>
-						<option value="AVAX-FUJI">Avalanche Fuji</option>
-						<option value="ETH-SEPOLIA">Ethereum Sepolia</option>
-					</select>
-				</div>
-				{secretsConfigured ? 
-					<button >Create wallet</button> :
-					<button disabled>Create wallet</button>
-				}
-			</form>
-			{!secretsConfigured && <p>Your secrets have not been configured.</p>}
-			{createWalletResponse?.error && <p>Transaction failed. Please check your transaction logs for details.</p>}
-	</section>
+<BaseLayout>
 	<section>
-		<h2>Wallets</h2>
-		<WalletList />
+		<h1>Wallets Playground</h1>
+		<p>An exploration of the <code>@circle-fin/developer-controlled-wallets</code> package for the creation and listing of wallet sets and wallets. Alternatively, go directly to the <a href="https://console.circle.com/wallets/dev/wallets">Circle developer's console</a> to see a list of all developer-controlled wallets that have been created.</p>
 	</section>
-		
-	</main>
+
+	<section>
+		<h2>Create Wallet Set</h2>
+		<form action={actions.createWalletSet.createWalletSet} method="POST">
+
+			<div class="input-wrapper">
+				<label for="walletSetName">Wallet Set Name</label>
+				<input type="text" id="walletSetName" name="walletSetName" placeholder="e.g. Sally's Grocery" />
+			</div>
+			
+			{secretsConfigured ? 
+				<button >Create</button> :
+				<button disabled>Create</button>
+			}
+		</form>
+		{!secretsConfigured && <p>Your secrets have not been configured.</p>}
+		{createWalletSetResponse?.error && <p>Transaction failed. Please check your transaction logs for details.</p>}
+	</section>
+
+	<section>
+		<h2>Wallet Sets</h2>
+		<WalletSets />
+	</section>
 </BaseLayout>
 
 <style>

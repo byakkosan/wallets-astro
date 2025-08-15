@@ -75,8 +75,22 @@ section {
 }
 
 /* Standardised element styles */
+p {
+  line-height: 1.38;
+}
+
 a {
   color: white;
+}
+
+fieldset {
+  width: fit-content;
+  display: flex;
+  gap: var(--space-m);
+}
+
+legend {
+  font-size: var(--step--1);
 }
 
 label {
@@ -91,6 +105,10 @@ input:not([type="submit"]):not([type="file"]) {
   color: white;
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
+}
+
+input[type="number"] {
+  max-width: 10ch;
 }
 
 textarea {
@@ -122,4 +140,15 @@ button {
   border-radius: var(--border-radius);
   padding: var(--space-2xs) var(--space-xs);
   cursor: pointer;
+}
+
+/* Shared component styles */
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+
+.break-line {
+  word-break: break-all;
 }

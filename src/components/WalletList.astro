@@ -4,19 +4,13 @@ import CopyBlock from './CopyBlock.astro';
 
 interface Wallet {
   id: string;
-  name: string;
   blockchain: string;
   address: string;
-  createDate: string;
-  updateDate: string;
+  accountType: string;
 }
 
 const secretsConfigured = Boolean( getSecret('API_KEY')) && Boolean(getSecret('ENTITY_SECRET'));
-const walletSetId = getSecret('WALLET_SET_ID');
-
-if (walletSetId === '') {
-  throw new Error('WALLET_SET_ID is not set. Please set it in your environment variables.');
-}
+const walletSetId = Astro.props.walletSetId;
 
 const url = `https://api.circle.com/v1/w3s/wallets?walletSetId=${walletSetId}`;
 const options = {
@@ -34,9 +28,9 @@ const data = json.data;
 <table>
   <thead>
     <tr>
-      <th>Name</th>
       <th>Wallet ID</th>
       <th>Blockchain</th>
+      <th>Account Type</th>
       <th>Wallet Address</th>
     </tr>
   </thead>
@@ -44,9 +38,9 @@ const data = json.data;
   <tbody>
     {data.wallets.map((wallet: Wallet) => (
       <tr>
-        <td>{wallet.name}</td>
-        <td><CopyBlock source={wallet.id} /></td>
+        <td><CopyBlock source={wallet.id} hasLink={true} /></td>
         <td>{wallet.blockchain}</td>
+        <td>{wallet.accountType}</td>
         <td><CopyBlock source={wallet.address} /></td>
       </tr>
     ))}

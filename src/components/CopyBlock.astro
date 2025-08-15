@@ -1,9 +1,9 @@
 ---
 import { Code } from 'astro:components';
-const {source} = Astro.props;
+const {source, hasLink = false} = Astro.props;
 ---
 <div>
-  <Code code={source} theme="css-variables" />
+  {hasLink ? <a href={`/wallet/${source}`}><code>{source}</code></a> : <Code code={source} theme="css-variables" />}
   <span>Copied!</span>
   <button data-copy-button type="button">
     <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke-width='1.75'>
@@ -14,7 +14,6 @@ const {source} = Astro.props;
   </button>
   <textarea>{source}</textarea>
 </div>
-
 
 <style>
   div {
@@ -32,6 +31,7 @@ const {source} = Astro.props;
     padding: var(--space-3xs) var(--space-3xs) 0;
     opacity: 0.7;
     transition: opacity ease-in-out 150ms;
+    flex: none;
   }
 
   button:hover,
@@ -57,12 +57,13 @@ const {source} = Astro.props;
     display: none;
   }
 
-  :global(span.line span) {
+  :global(span.line span),
+  a code {
     display: block;
-    width: 12em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    max-width: 12em;
   }
 </style>
 

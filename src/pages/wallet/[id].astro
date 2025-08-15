@@ -1,0 +1,141 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { actions } from 'astro:actions';
+import { getSecret } from "astro:env/server";
+import { initiateDeveloperControlledWalletsClient } from "@circle-fin/developer-controlled-wallets";
+
+const walletId = Astro.url.pathname.match(/(?<=\/wallet\/)[\da-f-]{36}(?=$|[/?#])/i)?.[0];
+
+const client = initiateDeveloperControlledWalletsClient({
+  apiKey: `${getSecret("API_KEY")}`,
+  entitySecret: `${getSecret("ENTITY_SECRET")}`,
+});
+
+const tokenBalanceResponse = await client.getWalletTokenBalance({
+  id: `${walletId}`,
+});
+const tokenBalances = tokenBalanceResponse.data?.tokenBalances;
+
+const walletInfoResponse = await client.getWallet({
+  id: `${walletId}`,
+});
+const walletInfo = walletInfoResponse.data?.wallet;
+
+const dripTestnetTokensResponse = Astro.getActionResult(actions.dripTestnetTokens.dripTestnetTokens);
+if (dripTestnetTokensResponse && !dripTestnetTokensResponse.error) {
+  console.log("Drip testnet tokens successfully");
+}
+---
+<BaseLayout title="Wallet">
+  <section>
+    <h2>Wallet Information</h2>
+    {walletInfo ? (
+      <div class="wallet-info">
+        <p class="info-item">
+          <strong>Wallet ID:</strong> {walletInfo.id || walletId}
+        </p>
+        <p class="info-item break-line">
+          <strong>Address:</strong> {walletInfo.address}
+        </p>
+        <p class="info-item">
+          <strong>Blockchain:</strong> {walletInfo.blockchain}
+        </p>
+        <p class="info-item">
+          <strong>Account Type:</strong> {(walletInfo as any).accountType}
+        </p>
+        <p class="info-item">
+          <strong>Wallet Set ID:</strong> <a href={`/walletset/${walletInfo.walletSetId}`}>{walletInfo.walletSetId}</a>
+        </p>
+      </div>
+    ) : (
+      <p>Loading wallet information...</p>
+    )}
+  </section>
+
+  <section>
+    <form action={actions.dripTestnetTokens.dripTestnetTokens} method="POST">
+      <input type="hidden" name="address" value={walletInfo?.address} />
+      <input type="hidden" name="blockchain" value={walletInfo?.blockchain} />
+      <fieldset>
+        <legend>Get Testnet Tokens</legend>
+        <label>
+          <input type="checkbox" name="native" value="true" />
+          <span>Native Token</span>
+        </label>
+        <label>
+          <input type="checkbox" name="usdc" value="true" />
+          <span>USDC</span>
+        </label>
+        <label>
+          <input type="checkbox" name="eurc" value="true" />
+          <span>EURC</span>
+        </label>
+      </fieldset>
+      <button type="submit">Drip Tokens</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Token Balances</h2>
+    <button type="button" id="clearParamsBtn" class="refresh-btn">Refresh</button>
+
+    {tokenBalances && tokenBalances.length > 0 ? (
+      <div class="token-list">
+        {tokenBalances.map((balance) => (
+          <div class="token-item">
+            <p class="token-amount">{balance.amount}</p>
+            <p class="token-symbol">{balance.token.symbol}</p>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p>No token balances found</p>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  h2 {
+    margin-block-end: var(--space-s);
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    align-items: flex-start;
+  }
+
+  .refresh-btn {
+    margin-block-end: var(--space-m);
+  }
+
+  .token-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-s);
+  }
+
+  .token-item {
+    border: 1px solid white;
+    border-radius: var(--border-radius);
+    padding: var(--space-2xs);
+    text-align: center;
+    color: #adc6fd;
+  }
+
+  .token-amount {
+    font-weight: bold;
+    font-size: var(--step-3);
+  }
+
+  .token-symbol {
+    font-size: var(--step--2);
+  }
+</style>
+
+<script>
+  document.getElementById('clearParamsBtn')?.addEventListener('click', (event) => {
+    location.replace(location.origin + location.pathname);
+  });
+</script>
