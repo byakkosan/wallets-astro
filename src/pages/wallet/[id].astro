@@ -21,7 +21,7 @@ const walletInfoResponse = await client.getWallet({
 });
 const walletInfo = walletInfoResponse.data?.wallet;
 
-const dripTestnetTokensResponse = Astro.getActionResult(actions.dripTestnetTokens.dripTestnetTokens);
+const dripTestnetTokensResponse = Astro.getActionResult(actions.wallet.dripTestnetTokens);
 if (dripTestnetTokensResponse && !dripTestnetTokensResponse.error) {
   console.log("Drip testnet tokens successfully");
 }
@@ -53,7 +53,7 @@ if (dripTestnetTokensResponse && !dripTestnetTokensResponse.error) {
   </section>
 
   <section>
-    <form action={actions.dripTestnetTokens.dripTestnetTokens} method="POST">
+    <form action={actions.wallet.dripTestnetTokens} method="POST">
       <input type="hidden" name="address" value={walletInfo?.address} />
       <input type="hidden" name="blockchain" value={walletInfo?.blockchain} />
       <fieldset>
@@ -83,7 +83,7 @@ if (dripTestnetTokensResponse && !dripTestnetTokensResponse.error) {
       <div class="token-list">
         {tokenBalances.map((balance) => (
           <div class="token-item">
-            <p class="token-amount">{balance.amount}</p>
+            <p class="token-amount">{parseFloat(balance.amount).toFixed(6).replace(/\.?0+$/, '')}</p>
             <p class="token-symbol">{balance.token.symbol}</p>
           </div>
         ))}

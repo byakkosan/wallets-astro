@@ -7,7 +7,7 @@ import chains from '../../data/chains.json';
 
 const secretsConfigured = Boolean( getSecret('API_KEY')) && Boolean(getSecret('ENTITY_SECRET'));
 const walletSetId = Astro.url.pathname.match(/(?<=\/walletset\/)[\da-f-]{36}(?=$|[/?#])/i)?.[0];
-const createWalletResponse = Astro.getActionResult(actions.createWallet.createWallet);
+const createWalletResponse = Astro.getActionResult(actions.wallet.create);
 if (createWalletResponse && !createWalletResponse.error) {
   console.log("Wallet created successfully");
 }
@@ -19,7 +19,7 @@ if (createWalletResponse && !createWalletResponse.error) {
   </section>
   <section>
 		<h2>Create new wallet</h2>
-		<form action={actions.createWallet.createWallet} method="POST">
+		<form action={actions.wallet.create} method="POST">
       <fieldset class="radio-wrapper">
         <legend>Account Type</legend>
         <div class="radio-wrapper">

@@ -1,6 +1,7 @@
 ---
-import { getSecret } from 'astro:env/server';
-import CopyBlock from './CopyBlock.astro';
+import { getSecret } from "astro:env/server";
+import CopyBlock from "./CopyBlock.astro";
+import { parseLinkHeader } from "../utils/helpers";
 
 interface WalletSet {
   id: string;
@@ -10,19 +11,41 @@ interface WalletSet {
   updateDate: string;
 }
 
-const secretsConfigured = Boolean( getSecret('API_KEY')) && Boolean(getSecret('ENTITY_SECRET'));
+interface PaginationLinks {
+  first?: string;
+  prev?: string;
+  next?: string;
+  last?: string;
+}
 
-const url = `https://api.circle.com/v1/w3s/walletSets`;
+const secretsConfigured = Boolean(getSecret("API_KEY")) && Boolean(getSecret("ENTITY_SECRET"));
+
+const urlParams = new URL(Astro.request.url).searchParams;
+const pageAfter = urlParams.get('pageAfter');
+const pageBefore = urlParams.get('pageBefore');
+const pageSize = urlParams.get('pageSize') || '10';
+
+let apiUrl = `https://api.circle.com/v1/w3s/walletSets?pageSize=${pageSize}`;
+if (pageAfter) {
+  apiUrl += `&pageAfter=${pageAfter}`;
+}
+if (pageBefore) {
+  apiUrl += `&pageBefore=${pageBefore}`;
+}
+
 const options = {
-  method: 'GET',
+  method: "GET",
   headers: {
-    Authorization: `Bearer ${getSecret('API_KEY')}`,
-    'Content-Type': 'application/json'
-  }
+    Authorization: `Bearer ${getSecret("API_KEY")}`,
+    "Content-Type": "application/json",
+  },
 };
-const response = await fetch(url, options);
+const response = await fetch(apiUrl, options);
 const json = await response.json();
 const data = json.data;
+
+const linkHeader = response.headers.get("link");
+const links: PaginationLinks = parseLinkHeader(linkHeader);
 ---
 
 <table>
@@ -33,18 +56,34 @@ const data = json.data;
       <th>Custody Type</th>
     </tr>
   </thead>
-  {secretsConfigured &&
-  <tbody>
-    {data.walletSets.map((walletSet: WalletSet) => (
-      <tr>
-        <td data-label="Name"><a href={`/walletset/${walletSet.id}`}>{walletSet.name}</a></td>
-        <td data-label="WalletSet ID" class="collapse"><CopyBlock source={walletSet.id} /></td>
-        <td data-label="Custody Type">{walletSet.custodyType}</td>
-      </tr>
-    ))}
-  </tbody>
-  }
+  {secretsConfigured && (
+    <tbody>
+      {data.walletSets.map((walletSet: WalletSet) => (
+        <tr>
+          <td data-label="Name">
+            <a href={`/walletset/${walletSet.id}`}>{walletSet.name}</a>
+          </td>
+          <td data-label="WalletSet ID" class="collapse">
+            <CopyBlock source={walletSet.id} />
+          </td>
+          <td data-label="Custody Type">{walletSet.custodyType}</td>
+        </tr>
+      ))}
+    </tbody>
+  )}
 </table>
+
+<div class="pagination">
+  {links.first && links.prev && (
+    <a href={`?${new URL(links.first).searchParams}`} class="pagination-btn">First</a>
+  )}
+  {links.prev && (
+    <a href={`?${new URL(links.prev).searchParams}`} class="pagination-btn">Previous</a>
+  )}
+  {links.next && (
+    <a href={`?${new URL(links.next).searchParams}`} class="pagination-btn">Next</a>
+  )}
+</div>
 
 <style>
   table {
@@ -80,7 +119,7 @@ const data = json.data;
       position: absolute;
       opacity: 0;
     }
-      
+
     tbody {
       display: block;
     }
@@ -107,5 +146,27 @@ const data = json.data;
     td:last-child {
       border-bottom: 0;
     }
+  }
+
+  .pagination {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+
+  .pagination-btn {
+    padding: 0.5rem 1rem;
+    background-color: #f0f0f0;
+    color: #333;
+    text-decoration: none;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    transition: background-color 0.2s;
+    font-size: inherit;
+  }
+
+  .pagination-btn:hover {
+    background-color: #e0e0e0;
   }
 </style>

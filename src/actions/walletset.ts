@@ -10,8 +10,8 @@ const client = initiateDeveloperControlledWalletsClient({
 
 const slugify = (str: string) => str.toLowerCase().replace(/\s+/g, '-');
 
-export const createWalletSet = {
-  createWalletSet: defineAction({
+export const walletset = {
+  create: defineAction({
     accept: "form",
     input: z.object({
       walletSetName: z.string(),
@@ -22,5 +22,24 @@ export const createWalletSet = {
       })
       return walletSet.data;
     },
-  })
+  }),
+  pagination: defineAction({
+    input: z.object({
+      url: z.string(),
+    }),
+    handler: async (input) => {
+      const url = input.url;
+      const options = {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${getSecret('API_KEY')}`,
+          'Content-Type': 'application/json'
+        }
+      };
+      const response = await fetch(url, options);
+      const json = await response.json();
+      const data = json.data;
+      return data;
+    },
+  }),
 }

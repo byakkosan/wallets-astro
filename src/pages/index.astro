@@ -5,7 +5,7 @@ import { actions } from 'astro:actions';
 import { getSecret } from "astro:env/server";
 
 const secretsConfigured = Boolean( getSecret('API_KEY')) && Boolean(getSecret('ENTITY_SECRET'));
-const createWalletSetResponse = Astro.getActionResult(actions.createWalletSet.createWalletSet);
+const createWalletSetResponse = Astro.getActionResult(actions.walletset.create);
 
 if (createWalletSetResponse && !createWalletSetResponse.error) {
   return Astro.redirect(`/walletset/${createWalletSetResponse.data?.walletSet.id}`);
@@ -20,7 +20,7 @@ if (createWalletSetResponse && !createWalletSetResponse.error) {
 
 	<section>
 		<h2>Create Wallet Set</h2>
-		<form action={actions.createWalletSet.createWalletSet} method="POST">
+		<form action={actions.walletset.create} method="POST">
 
 			<div class="input-wrapper">
 				<label for="walletSetName">Wallet Set Name</label>

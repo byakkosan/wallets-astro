@@ -1,9 +1,7 @@
-import { createWallet } from "./createWallet.js";
-import { createWalletSet } from "./createWalletSet.js";
-import { dripTestnetTokens } from "./dripTestnetTokens.js";
+import { wallet } from "./wallet.js";
+import { walletset } from "./walletset.js";
 
 export const server = {
-  createWalletSet,
-  createWallet,
-  dripTestnetTokens
+  wallet,
+  walletset
 };
