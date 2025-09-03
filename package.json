@@ -9,8 +9,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/node": "^9.4.2",
+    "@astrojs/node": "^9.4.3",
     "@circle-fin/developer-controlled-wallets": "^8.4.0",
-    "astro": "^5.13.2"
+    "astro": "^5.13.5"
   }
 }
